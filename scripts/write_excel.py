@@ -16,6 +16,7 @@ import json
 import sys
 from typing import Any, Dict, List, Optional
 from openpyxl import load_workbook
+from openpyxl.comments import Comment
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -95,6 +96,35 @@ def write_header_info(ws: Worksheet, account_info: Dict[str, Optional[str]]) -> 
             ws[cell_addr] = value
 
 
+def format_non_considered_details(details: List[Dict[str, Any]]) -> str:
+    """
+    Format non-considered details into a readable comment string.
+    
+    Args:
+        details: List of non-considered transaction details
+        
+    Returns:
+        Formatted string for Excel Comment
+    """
+    if not details:
+        return ""
+    
+    lines = ["Excluded Transactions:"]
+    for i, detail in enumerate(details, 1):
+        date = detail.get("date", "N/A")
+        amount = detail.get("amount", 0)
+        description = detail.get("description", "")
+        reason = detail.get("reason", "")
+        
+        lines.append(f"{i}. {date}: ${amount:.2f}")
+        lines.append(f"   {description}")
+        if reason:
+            lines.append(f"   Reason: {reason}")
+        lines.append("")
+    
+    return "\n".join(lines)
+
+
 def write_monthly_data(ws: Worksheet, monthly_data: List[Dict[str, Any]]) -> None:
     """
     Write monthly deposit and NSF data to the worksheet matrix.
@@ -129,11 +159,15 @@ def write_monthly_data(ws: Worksheet, monthly_data: List[Dict[str, Any]]) -> Non
     # Track NSF counts per month (in case multiple years have data for same month)
     nsf_by_month: Dict[str, int] = {}
     
+    # Track non-considered details per cell (month, year) to add comments
+    non_considered_details_map: Dict[str, List[Dict[str, Any]]] = {}
+    
     for entry in monthly_data:
         month: str = entry.get("month")
         year: int = entry.get("year")
         total_deposits = entry.get("total_deposits")
-        total_non_considered = entry.get("total_non_considered")
+        total_non_considered = entry.get("total_non_considered", 0.0)
+        non_considered_details: List[Dict[str, Any]] = entry.get("non_considered_details", [])
         nsf_count: int = entry.get("nsf_count", 0)
         
         # Validate month
@@ -157,17 +191,25 @@ def write_monthly_data(ws: Worksheet, monthly_data: List[Dict[str, Any]]) -> Non
                     print(f"Warning: Cannot convert total_deposits '{total_deposits}' to number, skipping.", file=sys.stderr)
         
         # Write Total Non-Considered Deposits
-        if year in YEAR_NON_CONSIDERED_COLUMN_MAP and total_non_considered is not None:
+        if year in YEAR_NON_CONSIDERED_COLUMN_MAP:
             col = YEAR_NON_CONSIDERED_COLUMN_MAP[year]
             cell_addr = f"{col}{row}"
-            # Ensure numeric value
-            if isinstance(total_non_considered, (int, float)):
-                ws[cell_addr] = float(total_non_considered)
-            else:
-                try:
+            
+            # Write the numeric value
+            if total_non_considered is not None:
+                if isinstance(total_non_considered, (int, float)):
                     ws[cell_addr] = float(total_non_considered)
-                except (ValueError, TypeError):
-                    print(f"Warning: Cannot convert total_non_considered '{total_non_considered}' to number, skipping.", file=sys.stderr)
+                else:
+                    try:
+                        ws[cell_addr] = float(total_non_considered)
+                    except (ValueError, TypeError):
+                        ws[cell_addr] = 0.00
+                        print(f"Warning: Cannot convert total_non_considered '{total_non_considered}' to number, using 0.00.", file=sys.stderr)
+            
+            # Add Excel Comment for non-considered details
+            if non_considered_details:
+                details_key = f"{month}_{year}"
+                non_considered_details_map[details_key] = non_considered_details
         
         # Accumulate NSF count per month
         if nsf_count is not None:
@@ -178,6 +220,32 @@ def write_monthly_data(ws: Worksheet, monthly_data: List[Dict[str, Any]]) -> Non
         row = MONTH_ROW_MAP[month]
         cell_addr = f"{NSF_COLUMN}{row}"
         ws[cell_addr] = int(total_nsf)
+    
+    # Add comments for non-considered details
+    # Need to do this after all data is written to collect details for each month/year
+    for entry in monthly_data:
+        month: str = entry.get("month")
+        year: int = entry.get("year")
+        non_considered_details: List[Dict[str, Any]] = entry.get("non_considered_details", [])
+        
+        if month not in MONTH_ROW_MAP:
+            continue
+        
+        if year not in YEAR_NON_CONSIDERED_COLUMN_MAP:
+            continue
+        
+        if not non_considered_details:
+            continue
+        
+        row = MONTH_ROW_MAP[month]
+        col = YEAR_NON_CONSIDERED_COLUMN_MAP[year]
+        cell_addr = f"{col}{row}"
+        
+        # Format and add comment
+        comment_text = format_non_considered_details(non_considered_details)
+        if comment_text:
+            comment = Comment(comment_text, "System")
+            ws[cell_addr].comment = comment
 
 
 def write_excel_data(
