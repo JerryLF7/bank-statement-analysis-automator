@@ -70,12 +70,25 @@ Bank statements frequently span non-calendar months (e.g., 04/12/2025 - 05/11/20
 - Do not manually sum individual line items unless the summary page is missing or illegible.
 - Do not deduct any withdrawals, fees, or negative balances.
 
-### 3. Non-Considered Deposits (MVP Constraint)
+### 3. Non-Considered Deposits (Ineligible Deposits)
 
-- In the current minimum viable product (MVP) phase, the exclusion of specific deposits (e.g., transfers, loan proceeds, refunds) is **not implemented**.
-- The `total_non_considered` field must always be `0.00`.
-- The `non_considered_details` array must always be empty `[]`.
-- Do not write any values to columns E, F, or G other than `0`.
+Only ongoing business revenue should be considered as qualifying income. You must identify and exclude non-revenue deposits. The sum of these goes into `total_non_considered`, and the itemized list goes into `non_considered_details`.
+
+**Rules for Exclusion:**
+1. **Internal/Inter-account Transfers:** Funds moving between the borrower's own accounts. 
+   - *Keywords:* "Transfer from", "Online Banking Transfer", "Zelle from [Borrower Name]".
+2. **Loan Proceeds & Cash Advances:** Borrowed funds are liabilities, not income.
+   - *Keywords:* "SBA Treas", "Loan Disbursement", "Amex Advance", "Kabbage", "Credit Card Advance".
+3. **Refunds, Returns & Reversals:** Money sent back from vendors or reversed payments.
+   - *Keywords:* "Refund", "Return Item", "Reversal", "Chargeback".
+4. **W-2 Wages & Payroll:** Personal salary income from other employment must be excluded (it is calculated separately).
+   - *Keywords:* "Payroll", "Paystub", "Salary", "Direct Deposit [Employer Name]".
+5. **One-time / Unusual Deposits:** Non-recurring personal or unusual lump sums.
+   - *Keywords:* "IRS TREAS 310" (Tax refunds), Escrow payouts, Insurance claims.
+
+**Handling Details:**
+- Every excluded transaction must be recorded in the `non_considered_details` JSON array with its `date`, `amount`, `description`, and the `reason` (referencing one of the rules above).
+- The Python script should ideally insert these details as Excel Comments/Notes on the corresponding `Total Non-Considered` cell for underwriter review.
 
 ### 4. NSF (Non-Sufficient Funds) Count
 
