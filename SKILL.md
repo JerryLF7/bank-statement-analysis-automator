@@ -19,8 +19,9 @@ When this skill is active, you should:
 8. Return the filled Excel file to the user.
 
 Read `extraction_prompt.md` for the exact extraction prompt and output schema.
-Read `reference.md` for worksheet mapping rules and business logic.
-Read `cases.md` when the user correction suggests a narrow or example-driven pattern.
+Read `references/reference.md` for worksheet mapping rules and business logic.
+Read `references/cases.md` when the user correction suggests a narrow or example-driven pattern.
+Read `references/chat-summary-template.md` before sending the final response so the chat summary stays consistent and easy to review.
 Use `Bank_Statement_Income_Template.xlsx` as the Excel worksheet template.
 Use `scripts/write_excel.py` to write confirmed JSON values into the worksheet.
 
