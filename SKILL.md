@@ -20,8 +20,33 @@ When this skill is active, you should:
 
 Read `extraction_prompt.md` for the exact extraction prompt and output schema.
 Read `reference.md` for worksheet mapping rules and business logic.
+Read `cases.md` when the user correction suggests a narrow or example-driven pattern.
 Use `template.xlsx` as the Excel worksheet template.
 Use `scripts/write_excel.py` to write confirmed JSON values into the worksheet.
+
+## Learning workflow for post-result feedback
+
+For this team-uw skill, treat post-result user corrections or supplements as potential learnings when they reveal a reusable rule or case.
+
+Use this flow:
+1. Detect feedback even when phrased indirectly, such as "加上这一笔 HOA fee" or "第 2 页 summary 的也要算进去".
+2. First complete the user's requested correction or supplement.
+3. Then summarize the reusable learning in plain language.
+4. Ask the user to confirm two things:
+   - whether this should be recorded as a **general rule** or a **special case**
+   - whether the summary is accurate
+5. If the user wants changes, revise the summary and ask again until they agree.
+6. After confirmation:
+   - write **general rule** content into `references/reference.md`
+   - write **special case** content into `references/cases.md`
+7. Then commit and push automatically with a structured commit message that includes the source user name, source user ID, the learning summary, and which knowledge file was updated.
+
+User-facing confirmation language should be plain and business-readable. Do not mention filesystem paths in that prompt. Say things like:
+- "I’ll record this as a general rule for bank statement income. Please confirm the wording."
+- "I’ll record this as a special case for bank statement income. Please confirm the wording."
+
+Do not record unconfirmed learning content.
+Do not use this learning workflow to modify scripts, prompts, templates, or unrelated files.
 
 ## Examples
 - User uploads a 12-month bank statement PDF and a blank analysis worksheet and asks to fill the worksheet automatically.

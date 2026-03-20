@@ -1,5 +1,7 @@
 # Reference Guide
 
+Use this file only for durable, reusable **general rules**. Put narrow, example-driven, or document-specific learnings in `cases.md` instead.
+
 ## Bank Statement Analysis Worksheet: Cell Mapping
 
 ### 1. Account Information (Header Rows)
@@ -42,9 +44,9 @@ The columns are determined by the `year` and the specific data point being writt
 | `total_deposits`         | 2024 | B            | Total Deposits (2024)           | Numeric float (e.g., 15000.00)           |
 | `total_deposits`         | 2025 | C            | Total Deposits (2025)           | Numeric float                            |
 | `total_deposits`         | 2026 | D            | Total Deposits (2026)           | Numeric float                            |
-| `total_non_considered`   | 2024 | E            | Total Non-Considered (2024)     | Numeric float       |
-| `total_non_considered`   | 2025 | F            | Total Non-Considered (2025)     | Numeric float       |
-| `total_non_considered`   | 2026 | G            | Total Non-Considered (2026)     | Numeric float       |
+| `total_non_considered`   | 2024 | E            | Total Non-Considered (2024)     | Numeric float (Always 0.00 for MVP)      |
+| `total_non_considered`   | 2025 | F            | Total Non-Considered (2025)     | Numeric float (Always 0.00 for MVP)      |
+| `total_non_considered`   | 2026 | G            | Total Non-Considered (2026)     | Numeric float (Always 0.00 for MVP)      |
 | `nsf_count`              | Any  | H            | NSF Count                       | Integer. Applies to the row regardless of year. |
 
 ---
@@ -68,23 +70,12 @@ Bank statements frequently span non-calendar months (e.g., 04/12/2025 - 05/11/20
 - Do not manually sum individual line items unless the summary page is missing or illegible.
 - Do not deduct any withdrawals, fees, or negative balances.
 
-### 3. Non-Considered Deposits (Ineligible Deposits)
+### 3. Non-Considered Deposits (MVP Constraint)
 
-Only ongoing business revenue should be considered as qualifying income. You must identify and exclude non-revenue deposits. The sum of these goes into `total_non_considered`, and the itemized list goes into `non_considered_details`.
-
-**Rules for Exclusion:**
-1. **Internal/Inter-account Transfers:** Funds moving between the borrower's own accounts. 
-   - *Keywords:* "Transfer from", "Online Banking Transfer", "Zelle from [Borrower Name]".
-2. **Loan Proceeds & Cash Advances:** Borrowed funds are liabilities, not income.
-   - *Keywords:* "SBA Treas", "Loan Disbursement", "Amex Advance", "Kabbage", "Credit Card Advance".
-3. **Refunds, Returns & Reversals:** Money sent back from vendors or reversed payments.
-   - *Keywords:* "Refund", "Return Item", "Reversal", "Chargeback".
-4. **One-time / Unusual Deposits:** Non-recurring personal or unusual lump sums.
-   - *Keywords:* "IRS TREAS 310" (Tax refunds), Escrow payouts, Insurance claims.
-
-**Handling Details:**
-- Every excluded transaction must be recorded in the `non_considered_details` JSON array with its `date`, `amount`, `description`, and the `reason` (referencing one of the rules above).
-- The Python script should ideally insert these details as Excel Comments/Notes on the corresponding `Total Non-Considered` cell for underwriter review.
+- In the current minimum viable product (MVP) phase, the exclusion of specific deposits (e.g., transfers, loan proceeds, refunds) is **not implemented**.
+- The `total_non_considered` field must always be `0.00`.
+- The `non_considered_details` array must always be empty `[]`.
+- Do not write any values to columns E, F, or G other than `0`.
 
 ### 4. NSF (Non-Sufficient Funds) Count
 
