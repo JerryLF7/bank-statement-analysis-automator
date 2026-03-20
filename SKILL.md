@@ -57,8 +57,15 @@ Do not use this learning workflow to modify scripts, prompts, templates, or unre
 - Extract values directly using the model's document understanding capability; do not rely on Python OCR logic in `write_excel.py`.
 - Use structured JSON as the handoff format between extraction and Excel writing.
 - Extract at least these fields: `account_number`, `account_holder`, `account_holder_address`, `account_type`, `expiration_date`, and `monthly_data` (year, month, total_deposits, nsf_count).
-- **Important MVP Rule:** Do not attempt to calculate or extract excluded (non-considered) deposits in this version. Always set `total_non_considered` to `0.00` and `non_considered_details` to `[]`.
 - **Cross-Month Rule:** If a statement spans two months, assign it to the month with the most days in that period.
 - If a field is missing, unclear, or not explicitly shown, set it to `null` and flag it for review.
 - Keep numeric fields numeric in JSON and Excel output.
 - Preserve all formulas, formatting, and labels in the Excel file.
+- Do not change the worksheet-filling logic solely for the sake of the summary; fill the Excel file the same way the skill normally fills it.
+- After the workbook is ready, post a readable chat summary with two sections:
+  - `Excluded deposits`
+  - `Needs review`
+- Format the summary as clean bullets, not dense prose.
+- For each excluded deposit, include at least the date or month context, amount, short description, and exclusion reason.
+- For each review item, explain briefly what is uncertain and what the user should re-check.
+- If there are no excluded deposits or no review items, say `None` explicitly in that section.

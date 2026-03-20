@@ -88,7 +88,22 @@ Only ongoing business revenue should be considered as qualifying income. You mus
 
 **Handling Details:**
 - Every excluded transaction must be recorded in the `non_considered_details` JSON array with its `date`, `amount`, `description`, and the `reason` (referencing one of the rules above).
-- The Python script should ideally insert these details as Excel Comments/Notes on the corresponding `Total Non-Considered` cell for underwriter review.
+- Also report excluded transactions in the final chat summary so the user can see what was excluded and why without opening intermediate artifacts.
+- Keep worksheet filling behavior unchanged; the explanation layer belongs in the chat response, not in Excel comments.
+
+### 3A. Required Chat Summary
+
+After generating the Excel output, include a concise, readable summary in the chat response with exactly these sections:
+
+- **Excluded deposits**
+- **Needs review**
+
+Rules:
+- Use bullets for readability.
+- For each excluded deposit, include date or month context, amount, short description, and reason.
+- For each review item, describe what is uncertain and what the user should verify.
+- If a section has no items, write `None`.
+- Do not hide important uncertainty only in internal reasoning.
 
 ### 4. NSF (Non-Sufficient Funds) Count
 
