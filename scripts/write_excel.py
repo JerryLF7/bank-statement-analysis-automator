@@ -9,7 +9,7 @@ Usage:
     python write_excel.py <input_json_path> <template_xlsx_path> <output_xlsx_path>
 
 Example:
-    python write_excel.py extracted_data.json template.xlsx output_analysis.xlsx
+    python write_excel.py extracted_data.json Bank_Statement_Income_Template.xlsx output_analysis.xlsx
 """
 
 import json
@@ -282,7 +282,7 @@ def main():
     """CLI entry point."""
     if len(sys.argv) != 4:
         print("Usage: python write_excel.py <input_json_path> <template_xlsx_path> <output_xlsx_path>", file=sys.stderr)
-        print("Example: python write_excel.py extracted_data.json template.xlsx output_analysis.xlsx", file=sys.stderr)
+        print("Example: python write_excel.py extracted_data.json Bank_Statement_Income_Template.xlsx output_analysis.xlsx", file=sys.stderr)
         sys.exit(1)
     
     json_path = sys.argv[1]

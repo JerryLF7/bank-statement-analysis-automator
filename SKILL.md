@@ -21,7 +21,7 @@ When this skill is active, you should:
 Read `extraction_prompt.md` for the exact extraction prompt and output schema.
 Read `reference.md` for worksheet mapping rules and business logic.
 Read `cases.md` when the user correction suggests a narrow or example-driven pattern.
-Use `template.xlsx` as the Excel worksheet template.
+Use `Bank_Statement_Income_Template.xlsx` as the Excel worksheet template.
 Use `scripts/write_excel.py` to write confirmed JSON values into the worksheet.
 
 ## Learning workflow for post-result feedback
